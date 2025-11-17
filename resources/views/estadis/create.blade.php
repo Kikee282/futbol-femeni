@@ -1,45 +1,27 @@
 @extends('layouts.app')
+@section('title', 'Afegir nou equip')
 
 @section('content')
-    <div class="container">
-        <h1>Nou Estadi</h1>
+<h1 class="text-2xl font-bold mb-4">Afegir nou estadi</h1>
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Hi ha errors al formulari:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+@if ($errors->any())
+  <div class="bg-red-100 text-red-700 p-2 mb-4">
+    <ul>
+      @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+    </ul>
+  </div>
+@endif
 
-        <form action="{{ route('estadis.store') }}" method="POST">
-            @csrf
-
-            <div class="mb-3">
-                <label for="nom" class="form-label">Nom</label>
-                <input type="text" class="form-control" id="nom" name="nom" value="{{ old('nom') }}">
-            </div>
-
-            <div class="mb-3">
-                <label for="ciutat" class="form-label">Ciutat</label>
-                <input type="text" class="form-control" id="ciutat" name="ciutat" value="{{ old('ciutat') }}">
-            </div>
-
-            <div class="mb-3">
-                <label for="capacitat" class="form-label">Capacitat</label>
-                <input type="number" class="form-control" id="capacitat" name="capacitat" value="{{ old('capacitat') }}">
-            </div>
-
-            <div class="mb-3">
-                <label for="equip_principal" class="form-label">Equip Principal</label>
-                <input type="text" class="form-control" id="equip_principal" name="equip_principal" value="{{ old('equip_principal') }}">
-            </div>
-
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="{{ route('estadis.index') }}" class="btn btn-secondary">Cancel·lar</a>
-        </form>
-    </div>
+<form action="{{ route('estadis.store') }}" method="POST" class="space-y-4">
+  @csrf
+  <div>
+    <label for="nom" class="block font-bold">Nom:</label>
+    <input type="text" name="nom" id="nom" value="{{ old('nom') }}" class="border p-2 w-full">
+  </div>
+  <div>
+    <label for="capacitat" class="block font-bold">Capacitat:</label>
+    <input type="text" name="capacitat" id="capacitat" value="{{ old('capacitat') }}" class="border p-2 w-full">
+  </div>
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Afegir</button>
+</form>
 @endsection
