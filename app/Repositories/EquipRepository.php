@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Equip;
 
-class EquipRepository implements BaseRepository {
+class EquipRepository extends BaseRepository {
     public function getAll() {
         return Equip::all();
     }

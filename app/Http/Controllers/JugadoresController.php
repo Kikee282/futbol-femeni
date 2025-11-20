@@ -2,60 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\JugadoraService;
+use App\Services\EquipService; // Necessari per al desplegable d'equips al crear/editar
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+// use App\Http\Requests\StoreJugadoraRequest; // Descomentar quan el creïs
+// use App\Http\Requests\UpdateJugadoraRequest; // Descomentar quan el creïs
 
 class JugadoresController extends Controller
 {
-    private function getJugadoresData()
+    protected $jugadoraService;
+    protected $equipService;
+
+    public function __construct(JugadoraService $jugadoraService, EquipService $equipService)
     {
-        return [
-            ['id' => 1, 'nom' => 'Alexia Putellas', 'equip' => 'Barça Femení', 'posicio' => 'Migcampista'],
-            ['id' => 2, 'nom' => 'Esther González', 'equip' => 'Atlètic de Madrid', 'posicio' => 'Davantera'],
-            ['id' => 3, 'nom' => 'Misa Rodríguez', 'equip' => 'Real Madrid Femení', 'posicio' => 'Portera'],
-        ];
+        $this->jugadoraService = $jugadoraService;
+        $this->equipService = $equipService;
     }
 
     public function index()
     {
-        $jugadores = session()->get('jugadores');
-        if (is_null($jugadores)) {
-            $jugadores = $this->getJugadoresData();
-            session()->put('jugadores', $jugadores);
-        }
+        $jugadores = $this->jugadoraService->getAll();
         return view('jugadores.index', compact('jugadores'));
     }
 
     public function create()
     {
-        $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
-        return view('jugadores.create', compact('posicions'));
+        // Necessitem els equips per al <select> del formulari
+        $equips = $this->equipService->llistar();
+        return view('jugadores.create', compact('equips'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request) // Canviar a StoreJugadoraRequest més endavant
     {
-        $posicionsValides = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
-
-        $validated = $request->validate([
-            'nom' => 'required|string|min:3',
-            'equip' => 'required|string|min:2',
-            'posicio' => ['required', Rule::in($posicionsValides)],
+        // Validació ràpida (idealment moure a FormRequest)
+        $data = $request->validate([
+            'nom' => 'required|string',
+            'cognoms' => 'required|string',
+            'dorsal' => 'required|integer',
+            'equip_id' => 'required|exists:equips,id',
+            'data_naixement' => 'required|date',
+            'foto' => 'nullable|image'
         ]);
 
-        $jugadores = session()->get('jugadores', $this->getJugadoresData());
+        $this->jugadoraService->create($data);
 
-        $newId = count($jugadores) > 0 ? max(array_column($jugadores, 'id')) + 1 : 1;
-        
-        $newJugadora = [
-            'id' => $newId,
-            'nom' => $validated['nom'],
-            'equip' => $validated['equip'],
-            'posicio' => $validated['posicio'],
-        ];
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora creada correctament!');
+    }
 
-        $jugadores[] = $newJugadora;
-        session()->put('jugadores', $jugadores);
+    public function show($id)
+    {
+        $jugadora = $this->jugadoraService->find($id);
+        return view('jugadores.show', compact('jugadora'));
+    }
 
-        return redirect()->route('jugadores.index')->with('success', 'Jugadora creada correctament.');
+    public function edit($id)
+    {
+        $jugadora = $this->jugadoraService->find($id);
+        $equips = $this->equipService->llistar();
+        return view('jugadores.edit', compact('jugadora', 'equips'));
+    }
+
+    public function update(Request $request, $id) // Canviar a UpdateJugadoraRequest més endavant
+    {
+         $data = $request->validate([
+            'nom' => 'required|string',
+            'cognoms' => 'required|string',
+            'dorsal' => 'required|integer',
+            'equip_id' => 'required|exists:equips,id',
+            'data_naixement' => 'required|date',
+        ]);
+
+        $this->jugadoraService->update($id, $data);
+
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora actualitzada!');
+    }
+
+    public function destroy($id)
+    {
+        $this->jugadoraService->delete($id);
+        return redirect()->route('jugadores.index');
     }
 }
