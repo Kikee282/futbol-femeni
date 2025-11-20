@@ -2,42 +2,79 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Estadi;
 use Illuminate\Http\Request;
 
 class EstadiController extends Controller
 {
+    /**
+     * Dades inicials (seed) per als estadis.
+     */
+    private function getEstadisData()
+    {
+        return [
+            ['id' => 1, 'nom' => 'Estadi Johan Cruyff', 'ciutat' => 'Sant Joan Despí', 'capacitat' => 6000, 'equip_principal' => 'FC Barcelona Femení'],
+            ['id' => 2, 'nom' => 'Centro Deportivo Wanda Alcalá de Henares', 'ciutat' => 'Alcalá de Henares', 'capacitat' => 2800, 'equip_principal' => 'Atlètic de Madrid Femení'],
+            ['id' => 3, 'nom' => 'Estadio Alfredo Di Stéfano', 'ciutat' => 'Madrid', 'capacitat' => 6000, 'equip_principal' => 'Real Madrid Femení'],
+        ];
+    }
+
+    /**
+     * Mostra el llistat d'estadis.
+     */
     public function index()
     {
-        $estadis = Estadi::all();
+        // Obtenir estadis de la sessió. Si no n'hi ha, utilitzar les dades inicials.
+        $estadis = session()->get('estadis');
+
+        if (is_null($estadis)) {
+            $estadis = $this->getEstadisData();
+            session()->put('estadis', $estadis);
+        }
+
+        // Retorna la vista amb les dades de la sessió
         return view('estadis.index', compact('estadis'));
     }
 
-    public function show(Estadi $estadi)
+    /**
+     * Mostra el formulari per crear un nou estadi.
+     */
+    public function create()
     {
-        return view('estadis.show', compact('estadi'));
+        return view('estadis.create');
     }
 
-    public function create() { return view('estadis.create'); }
-
+    /**
+     * Emmagatzema un nou estadi a la sessió.
+     */
     public function store(Request $request)
     {
-        $estadi = new Estadi($request->all());
-        $estadi->save();
-        return redirect()->route('estadis.index')->with('success', 'Equip afegit correctament!');
-    }
+        // Validació dels camps
+        $validated = $request->validate([
+            'nom' => 'required|string|min:3',
+            'ciutat' => 'required|string|min:2',
+            'capacitat' => 'required|integer|min:0',
+            'equip_principal' => 'required|string|min:3',
+        ]);
 
-    public function edit(Estadi $estadi){
-        return view('estadis.edit', compact('estadi'));
-    }
+        // Obtenir estadis de la sessió (o les dades inicials si està buida)
+        $estadis = session()->get('estadis', $this->getEstadisData());
 
-    public function update(Request $request, Estadi $estadi){
-        $estadi->update($request->all());
-        return redirect()->route('estadis.index')->with('success', 'Equip afegit correctament!');
-    }
+        // Generar un nou ID (simple, per a l'exemple)
+        $newId = count($estadis) > 0 ? max(array_column($estadis, 'id')) + 1 : 1;
+        
+        $newEstadi = [
+            'id' => $newId,
+            'nom' => $validated['nom'],
+            'ciutat' => $validated['ciutat'],
+            'capacitat' => $validated['capacitat'],
+            'equip_principal' => $validated['equip_principal'],
+        ];
 
-    public function destroy(Estadi $estadi){
-        $estadi->delete();
-        return redirect()->route('estadis.index')->with('success', 'Equip afegit correctament!');
+        // Afegir el nou estadi i guardar a la sessió
+        $estadis[] = $newEstadi;
+        session()->put('estadis', $estadis);
+
+        // Redirigir al llistat amb missatge d'èxit
+        return redirect()->route('estadis.index')->with('success', 'Estadi creat correctament.');
     }
 }

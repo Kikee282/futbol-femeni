@@ -1,24 +1,29 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{{ route('equips.index') }}">Futbol Femení</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('equips.*') ? 'active' : '' }}" href="{{ route('equips.index') }}">Equips</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('estadis.*') ? 'active' : '' }}" href="{{ route('estadis.index') }}">Estadis</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('jugadores.*') ? 'active' : '' }}" href="{{ route('jugadores.index') }}">Jugadores</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('partits.*') ? 'active' : '' }}" href="{{ route('partits.index') }}">Partits</a>
-                </li>
-            </ul>
-        </div>
-    </div>
+{{-- Contingut per a: resources/views/partials/menu.blade.php --}}
+
+<nav class="p-4 bg-gray-800 text-white mb-6">
+  
+  {{-- Enllaç a Equips --}}
+  <a href="{{ route('equips.index') }}" 
+     class="px-2 hover:text-gray-300 {{ request()->routeIs('equips.*') ? 'font-bold underline' : '' }}">
+     Equips
+  </a>
+
+  {{-- Enllaç a Estadis --}}
+  <a href="{{ route('estadis.index') }}" 
+     class="px-2 hover:text-gray-300 {{ request()->routeIs('estadis.*') ? 'font-bold underline' : '' }}">
+     Estadis
+  </a>
+
+  {{-- Enllaç a Jugadores --}}
+  <a href="{{ route('jugadores.index') }}" 
+     class="px-2 hover:text-gray-300 {{ request()->routeIs('jugadores.*') ? 'font-bold underline' : '' }}">
+     Jugadores
+  </a>
+
+  {{-- Enllaç a Partits --}}
+  <a href="{{ route('partits.index') }}" 
+     class="px-2 hover:text-gray-300 {{ request()->routeIs('partits.*') ? 'font-bold underline' : '' }}">
+     Partits
+  </a>
+
 </nav>

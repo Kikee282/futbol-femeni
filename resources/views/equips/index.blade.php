@@ -16,19 +16,17 @@
   <thead class="bg-gray-200">
   <tr>
     <th class="border border-gray-300 p-2">Nom</th>
-    <th class="border border-gray-300 p-2">Estadi</th>
-    <th class="border border-gray-300 p-2">Títols</th>
-  </tr>
+    <th class="border border-gray-300 p-2">Ciutat</th>     <th class="border border-gray-300 p-2">Entrenador</th> </tr>
   </thead>
   <tbody>
-  @foreach($equips as $key => $equip)
+  {{-- Traiem $key perquè farem servir l'ID de l'equip --}}
+  @foreach($equips as $equip)
     <tr class="hover:bg-gray-100">
       <td class="border border-gray-300 p-2">
-        <a href="{{ route('equips.show', $key) }}" class="text-blue-700 hover:underline">{{ $equip['nom'] }}</a>
+        {{-- CANVIAT: Passem l'ID de l'equip a la ruta --}}
+        <a href="{{ route('equips.show', $equip['id']) }}" class="text-blue-700 hover:underline">{{ $equip['nom'] }}</a>
       </td>
-      <td class="border border-gray-300 p-2">{{ $equip['estadi'] }}</td>
-      <td class="border border-gray-300 p-2">{{ $equip['titols'] }}</td>
-    </tr>
+      <td class="border border-gray-300 p-2">{{ $equip['ciutat'] }}</td>     <td class="border border-gray-300 p-2">{{ $equip['entrenador'] }}</td> </tr>
   @endforeach
   </tbody>
 </table>
