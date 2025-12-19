@@ -1,108 +1,78 @@
-/* Estils bàsics per a taules, formularis i alertes */
+/* --------------------------------------------------------
+| ESTILS BÀSICS PER A TAULES, FORMULARIS I ALERTES
+| (Aquests estils complementen Tailwind)
+-------------------------------------------------------- */
 
-body {
-    background-color: #f8f9fa;
+/* --- FORMULARIS (General) --- */
+.form-card {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600; /* Similar a font-semibold de Tailwind */
     color: #333;
 }
 
-/* Taules */
-.table {
+.form-group input, .form-group select {
     width: 100%;
-    margin-bottom: 1rem;
-    color: #212529;
-    border-collapse: collapse;
-}
-.table th,
-.table td {
-    padding: 0.75rem;
-    vertical-align: top;
-    border-top: 1px solid #dee2e6;
-}
-.table thead th {
-    vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6;
-    background-color: #efefef;
-}
-.table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease-in-out;
 }
 
-/* Formularis */
-.form-label {
-    font-weight: 500;
-}
-.form-control, .form-select {
-    display: block;
-    width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #495057;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-.form-control:focus {
-    color: #495057;
-    background-color: #fff;
-    border-color: #80bdff;
+.form-group input:focus, .form-group select:focus {
+    border-color: #4c51bf; /* Color similar al focus de Tailwind (indigo) */
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* Botons */
-.btn {
-    display: inline-block;
-    font-weight: 400;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    text-decoration: none;
-    border: 1px solid transparent;
-}
-.btn-primary {
-    color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
-}
-.btn-success {
-    color: #fff;
-    background-color: #28a745;
-    border-color: #28a745;
-}
-.btn-secondary {
-    color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-.mb-3 {
-    margin-bottom: 1rem !important;
+/* --- TAULES (Estils bàsics) --- */
+table {
+    /* La taula base de la vista ja té classes de Tailwind, 
+       això assegura un reset de marge/padding si cal. */
+    margin: 1.5rem 0;
+    width: 100%;
 }
 
-/* Alertes */
+/* --- ALERTES I MISSATGES --- */
+
+/* Base per a totes les alertes */
 .alert {
-    position: relative;
     padding: 0.75rem 1.25rem;
     margin-bottom: 1rem;
     border: 1px solid transparent;
     border-radius: 0.25rem;
+    font-size: 1rem;
 }
-.alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+
+/* Alerta d'èxit */
+.alert.success-alert {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
 }
-.alert-danger {
-    color: #721c24;
+
+/* Alerta d'error (per validar) */
+.alert.error-alert {
+    color: #842029;
     background-color: #f8d7da;
-    border-color: #f5c6cb;
+    border-color: #f5c2c7;
 }
-.alert-danger ul {
-    margin-bottom: 0;
+
+.error-message {
+    color: #dc3545; /* Vermell fort per a errors de validació */
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }

@@ -1,47 +1,70 @@
 @extends('layouts.app')
 
+@section('title', 'Afegir Nova Jugadora')
+
 @section('content')
-    <div class="container">
-        <h1>Nova Jugadora</h1>
+    <h2 class="text-2xl font-bold mb-6">Afegir Nova Jugadora 👩‍</h2>
 
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Hi ha errors al formulari:</strong>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    <p class="mb-4">
+        <a href="{{ route('jugadores.index') }}" class="text-blue-600 hover:text-blue-800">
+            &larr; Tornar a la llista
+        </a>
+    </p>
 
-        <form action="{{ route('jugadores.store') }}" method="POST">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 max-w-lg mx-auto">
+        <form method="POST" action="{{ route('jugadores.store') }}">
             @csrf
 
-            <div class="mb-3">
-                <label for="nom" class="form-label">Nom</label>
-                <input type="text" class="form-control" id="nom" name="nom" value="{{ old('nom') }}">
+            {{-- Camp Nom --}}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="nom">
+                    Nom de la Jugadora:
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('nom') border-red-500 @enderror" 
+                       id="nom" name="nom" type="text" value="{{ old('nom') }}" required>
+                @error('nom')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="mb-3">
-                <label for="equip" class="form-label">Equip</label>
-                <input type="text" class="form-control" id="equip" name="equip" value="{{ old('equip') }}">
+            {{-- Camp Equip --}}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="equip">
+                    Equip:
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('equip') border-red-500 @enderror" 
+                       id="equip" name="equip" type="text" value="{{ old('equip') }}" required>
+                @error('equip')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror
             </div>
 
-            <div class="mb-3">
-                <label for="posicio" class="form-label">Posició</label>
-                <select class="form-select" id="posicio" name="posicio">
-                    <option value="" disabled {{ old('posicio') ? '' : 'selected' }}>Selecciona una posició</option>
+            {{-- Camp Posició (SELECT) --}}
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="posicio">
+                    Posició:
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('posicio') border-red-500 @enderror" 
+                        id="posicio" name="posicio" required>
+                    <option value="" disabled {{ old('posicio') ? '' : 'selected' }}>Selecciona una posició...</option>
+                    
+                    {{-- El controlador passa la variable $posicions --}}
                     @foreach ($posicions as $posicio)
                         <option value="{{ $posicio }}" {{ old('posicio') == $posicio ? 'selected' : '' }}>
                             {{ $posicio }}
                         </option>
                     @endforeach
                 </select>
+                @error('posicio')
+                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                @enderror
             </div>
 
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="{{ route('jugadores.index') }}" class="btn btn-secondary">Cancel·lar</a>
+            <div class="flex items-center justify-between">
+                <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                    Guardar Jugadora
+                </button>
+            </div>
         </form>
     </div>
 @endsection
