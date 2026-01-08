@@ -29,15 +29,19 @@
 
             {{-- Camp Equip --}}
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="equip">
-                    Equip:
-                </label>
-                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('equip') border-red-500 @enderror" 
-                       id="equip" name="equip" type="text" value="{{ old('equip') }}" required>
-                @error('equip')
-                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
-                @enderror
-            </div>
+    <label class="block text-gray-700 text-sm font-bold mb-2" for="equip_id">Equip:</label>
+    <select class="shadow ... @error('equip_id') border-red-500 @enderror" id="equip_id" name="equip_id" required>
+        <option value="" disabled selected>Selecciona un equip...</option>
+        @foreach ($equips as $equip)
+            <option value="{{ $equip->id }}" {{ old('equip_id') == $equip->id ? 'selected' : '' }}>
+                {{ $equip->nom }}
+            </option>
+        @endforeach
+    </select>
+    @error('equip_id')
+        <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+    @enderror
+</div>
 
             {{-- Camp Posició (SELECT) --}}
             <div class="mb-6">

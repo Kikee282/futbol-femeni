@@ -28,21 +28,49 @@
                     <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">Resultat</th>
                 </tr>
             </thead>
+            {{-- Filtros --}}
+    <div class="bg-gray-100 p-4 rounded mb-6">
+        <form action="{{ route('partits.index') }}" method="GET" class="flex gap-4 items-end">
+            <div>
+                <label for="arbitre" class="block text-sm font-medium text-gray-700">Filtrar per Àrbitre</label>
+                <input type="text" name="arbitre" value="{{ request('arbitre') }}" 
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        placeholder="Nom de l'àrbitre...">
+            </div>
+            
+            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700">
+                🔍 Buscar
+            </button>
+            
+            @if(request()->has('arbitre'))
+                <a href="{{ route('partits.index') }}" class="text-red-600 underline text-sm ml-2">Netejar filtres</a>
+            @endif
+        </form>
+    </div>
             <tbody class="bg-white">
                 @if (isset($partits) && count($partits) > 0)
                     @foreach ($partits as $partit)
                         <tr class="hover:bg-gray-100">
+                            {{-- CORRECCIÓN AQUÍ: Usamos ->local->nom y ->visitant->nom --}}
                             <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                <x-equip-mini :nom="$partit['local']"/>
+                                <x-equip-mini :nom="$partit->local->nom"/>
                             </td>
                             <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                <x-equip-mini :nom="$partit['visitant']"/>
+                                <x-equip-mini :nom="$partit->visitant->nom"/>
                             </td>
+                            
+                            {{-- CORRECCIÓN: Mejor usar sintaxis de objeto para la fecha también --}}
                             <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200 text-sm">
-                                {{ $partit['data'] }}
+                                {{ \Carbon\Carbon::parse($partit->data)->format('d/m/Y') }}
                             </td>
+                            
+                            {{-- CORRECCIÓN: Formatear un poco mejor el resultado --}}
                             <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200 font-bold">
-                                {{ $partit['resultat'] ?? 'PENDENT' }}
+                                @if($partit->resultat)
+                                    {{ $partit->resultat }}
+                                @else
+                                    <span class="text-gray-500 text-xs">PENDENT</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

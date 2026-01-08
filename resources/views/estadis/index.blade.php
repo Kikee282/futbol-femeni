@@ -1,49 +1,33 @@
 @extends('layouts.app')
-
-@section('title', 'Llistat d\'Estadis')
+@section('title', "Guia d'Equips")
 
 @section('content')
-    <h2>Llistat d'Estadis 🏟️</h2>
+<h1 class="text-3xl font-bold text-blue-800 mb-6">Guia d'Estadis</h1>
 
-    <p><a href="{{ route('estadis.create') }}" class="button-link">+ Nou Estadi</a></p>
+@if (session('success'))
+  <div class="bg-green-100 text-green-700 p-2 mb-4">{{ session('success') }}</div>
+@endif
 
-    {{-- Missatge d'èxit (Flash Session) --}}
-    @if (session('success'))
-        <div class="alert success-alert">
-            {{ session('success') }}
-        </div>
-    @endif
-    
-    {{-- Estils bàsics per a la taula i els missatges (pots moure'ls a guias.css) --}}
-    <style>
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 5px; }
-        .success-alert { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .button-link { background-color: #007bff; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; display: inline-block; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: white; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; color: #343a40; }
-        tr:hover { background-color: #f1f1f1; }
-        .no-records { text-align: center; color: #6c757d; padding: 20px; }
-    </style>
+<p class="mb-4">
+  <a href="{{ route('estadis.create') }}" class="bg-blue-600 text-white px-3 py-2 rounded">Nou Estadi</a>
+</p>
 
-    @if (count($estadis) > 0)
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Ciutat</th>
-                    <th>Capacitat</th>
-                    <th>Equip Principal</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{-- Iterem i utilitzem el Component Blade --}}
-                @foreach ($estadis as $estadi)
-                    <x-estadi-card :estadi="$estadi"/>
-                @endforeach
-            </tbody>
-        </table>
-    @else
-        <p class="no-records">No hi ha estadis registrats.</p>
-    @endif
+<table class="w-full border-collapse border border-gray-300">
+  <thead class="bg-gray-200">
+  <tr>
+    <th class="border border-gray-300 p-2">Nom</th>
+    <th class="border border-gray-300 p-2">Capacitat</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach($estadis as  $estadi)
+    <tr class="hover:bg-gray-100">
+      <td class="border border-gray-300 p-2">
+        <a href="{{ route('estadis.show',  $estadi->id) }}" class="text-blue-700 hover:underline">{{ $estadi->nom }}</a>
+      </td>
+      <td class="border border-gray-300 p-2">{{ $estadi->capacitat }}</td>
+    </tr>
+  @endforeach
+  </tbody>
+</table>
 @endsection

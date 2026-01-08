@@ -2,109 +2,97 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Equip; // Necessari per al formulari
+use App\Models\Jugadora;
+use App\Repositories\JugadoraRepository;
+use App\Services\JugadoraService;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class JugadoraController extends Controller
 {
-    protected $posicions = [
-        'Portera',
-        'Defensa',
-        'Migcampista',
-        'Davantera'
-    ];
-    
-    // Dades inicials per a la sessió (SEED) - Opcional, pots deixar-ho buit
-    protected $initialJugadores = [
-        [
-            'nom' => 'Alexia Putellas',
-            'equip' => 'FC Barcelona Femení',
-            'posicio' => 'Migcampista'
-        ],
-        [
-            'nom' => 'Misa Rodríguez',
-            'equip' => 'Real Madrid Femení',
-            'posicio' => 'Portera'
-        ],
-        [
-            'nom' => 'Esther González',
-            'equip' => 'Atlètic de Madrid',
-            'posicio' => 'Davantera'
-        ],
-    ];
+    protected $jugadoraService;
+    protected $jugadoraRepository;
 
-    /**
-     * Mètode privat per obtenir les jugadores de la sessió.
-     * Si no existeixen, les inicialitza.
-     */
-    protected function getJugadores()
+    // Definim les posicions per al formulari <select>
+    protected $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
+
+    public function __construct(JugadoraService $jugadoraService, JugadoraRepository $jugadoraRepository)
     {
-        // Si no existeix la clau 'jugadores', la creem (amb dades inicials o buida)
-        if (!session()->has('jugadores')) {
-            // Pots canviar $this->initialJugadores per [] si vols començar buit
-            session(['jugadores' => $this->initialJugadores]); 
-        }
-        
-        // Retornem les dades de la sessió.
-        return session('jugadores');
+        $this->jugadoraService = $jugadoraService;
+        $this->jugadoraRepository = $jugadoraRepository;
     }
 
     /**
-     * Mètode INDEX: Mostra la llista de jugadores.
-     * Ruta: GET /jugadores
+     * Mostra la llista de jugadores (ja implementat).
      */
     public function index()
     {
-        $jugadores = $this->getJugadores();
-        
+        $jugadores = $this->jugadoraRepository->getAll();
         return view('jugadores.index', compact('jugadores'));
     }
 
     /**
-     * Mètode CREATE: Mostra el formulari per crear.
-     * Ruta: GET /jugadores/crear
+     * Mostra el formulari de creació.
      */
     public function create()
     {
-        // Passem la llista de posicions a la vista per al <select>
+        $equips = Equip::all(); // Obtenim equips per al <select>
         return view('jugadores.create', [
-            'posicions' => $this->posicions
+            'posicions' => $this->posicions,
+            'equips' => $equips
         ]);
     }
 
     /**
-     * Mètode STORE: Guarda la nova jugadora a la sessió.
-     * Ruta: POST /jugadores
+     * Guarda la nova jugadora.
      */
     public function store(Request $request)
     {
-        // 1. Validació (segons l'enunciat)
-        $request->validate([
-            'nom' => 'required|min:3|max:150',
-            'equip' => 'required|min:2|max:150',
-            // Usem Rule::in per validar contra la nostra llista de posicions
-            'posicio' => ['required', Rule::in($this->posicions)], 
+        try {
+            $this->jugadoraService->createJugadora($request->all());
+            return redirect()->route('jugadores.index')->with('success', 'Jugadora creada correctament.');
+        } catch (ValidationException $e) {
+            return redirect()->route('jugadores.create')
+                ->withErrors($e->validator)
+                ->withInput();
+        }
+    }
+
+    /**
+     * Mostra el formulari per editar.
+     */
+    public function edit(Jugadora $jugadora) // Route Model Binding
+    {
+        $equips = Equip::all();
+        return view('jugadores.edit', [
+            'jugadora' => $jugadora,
+            'posicions' => $this->posicions,
+            'equips' => $equips
         ]);
-        
-        // 2. Obtenim les dades actuals de la sessió
-        $jugadores = $this->getJugadores();
-        
-        // 3. Calculem el nou ID
-        $newId = $jugadores ? max(array_column($jugadores, 'id')) + 1 : 1;
+    }
 
-        // 4. Creem la nova jugadora amb les dades del formulari
-        $novaJugadora = $request->only(['nom', 'equip', 'posicio']);
-        $novaJugadora['id'] = $newId;
+    /**
+     * Actualitza una jugadora existent.
+     */
+    public function update(Request $request, Jugadora $jugadora)
+    {
+        try {
+            $this->jugadoraService->updateJugadora($jugadora->id, $request->all());
+            return redirect()->route('jugadores.index')->with('success', 'Jugadora actualitzada correctament.');
+        } catch (ValidationException $e) {
+            return redirect()->route('jugadores.edit', $jugadora->id)
+                ->withErrors($e->validator)
+                ->withInput();
+        }
+    }
 
-        // 5. Afegim la nova jugadora a l'array
-        $jugadores[] = $novaJugadora;
-        
-        // 6. Guardem l'array actualitzat a la sessió
-        session(['jugadores' => $jugadores]);
-
-        // 7. Redirigim a la llista amb un missatge d'èxit
-        return redirect()
-            ->route('jugadores.index')
-            ->with('success', 'Jugadora "' . $novaJugadora['nom'] . '" afegida correctament!');
+    /**
+     * Esborra una jugadora.
+     */
+    public function destroy(Jugadora $jugadora)
+    {
+        $this->jugadoraRepository->delete($jugadora->id);
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora esborrada correctament.');
     }
 }

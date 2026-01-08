@@ -21,24 +21,36 @@
     <div class="bg-white shadow-md rounded my-6">
         <table class="min-w-full table-auto">
             <thead class="bg-gray-200">
-                <tr>
-                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">Nom</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">Equip</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-300 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">Posició</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white">
-                @if (isset($jugadores) && count($jugadores) > 0)
-                    {{-- Iterem i utilitzem el Component Blade --}}
-                    @foreach ($jugadores as $jugadora)
-                        <x-jugadora-row :jugadora="$jugadora"/>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="3" class="text-center py-4 px-6 text-gray-500">No hi ha jugadores registrades.</td>
-                    </tr>
-                @endif
-            </tbody>
+    <tr>
+        <th class="px-6 ...">Nom</th>
+        <th class="px-6 ...">Equip</th>
+        <th class="px-6 ...">Posició</th>
+        <th class="px-6 ...">Accions</th> {{-- NOVA COLUMNA --}}
+    </tr>
+</thead>
+<tbody class="bg-white">
+    @if (isset($jugadores) && count($jugadores) > 0)
+        @foreach ($jugadores as $jugadora)
+            {{-- El component <x-jugadora-row> ja no és necessari si fem això --}}
+            <tr class="hover:bg-gray-100">
+                <td class="px-6 ...">{{ $jugadora->nom }}</td>
+                <td class="px-6 ...">{{ $jugadora->equip->nom ?? 'Sense equip' }}</td>
+                <td class="px-6 ...">{{ $jugadora->posicio }}</td>
+                {{-- NOVES ACCIONS --}}
+                <td class="px-6 py-4 ...">
+                    <a href="{{ route('jugadores.edit', $jugadora) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                    <form action="{{ route('jugadores.destroy', $jugadora) }}" method="POST" class="inline-block ml-2">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Estàs segur?')">Esborrar</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+    @else
+        [...]
+    @endif
+</tbody>
         </table>
     </div>
 @endsection

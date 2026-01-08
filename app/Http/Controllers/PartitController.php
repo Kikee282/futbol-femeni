@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Partit;
 use Illuminate\Http\Request;
 
 class PartitController extends Controller
@@ -38,10 +39,22 @@ class PartitController extends Controller
      * Mètode INDEX: Mostra la llista de partits.
      * Ruta: GET /partits
      */
-    public function index()
+    public function index(Request $request)
     {
-        $partits = $this->getPartits();
-        
+        $query = Partit::with(['local', 'visitant']); // Eager loading
+
+        // Filtro por Árbitro
+        if ($request->filled('arbitre')) {
+            $query->where('arbitre', 'like', '%' . $request->arbitre . '%');
+        }
+
+        // Filtro por Jornada (Opcional pero útil)
+        if ($request->filled('jornada')) {
+            $query->where('jornada', $request->jornada);
+        }
+
+        $partits = $query->orderBy('data', 'asc')->get();
+
         return view('partits.index', compact('partits'));
     }
 
@@ -52,6 +65,13 @@ class PartitController extends Controller
     public function create()
     {
         return view('partits.create');
+    }
+
+    public function show(Partit $partit)
+    {
+        // Cargamos relaciones para optimizar
+        $partit->load('local', 'visitant', 'estadi');
+        return view('partits.show', compact('partit'));
     }
 
     /**
@@ -72,6 +92,8 @@ class PartitController extends Controller
             'resultat.regex' => 'El format del resultat no és vàlid. Ha de ser "GolsLocal-GolsVisitant" (ex. 2-1).',
             'visitant.different' => 'L\'equip visitant ha de ser diferent de l\'equip local.',
         ]);
+
+        
         
         // 2. Obtenció i Preparació de Dades
         $partits = $this->getPartits();

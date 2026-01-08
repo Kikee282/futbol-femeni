@@ -1,31 +1,54 @@
 @extends('layouts.app')
-@section('title', 'Afegir nou equip')
+
+@section('title', 'Crear Equip')
 
 @section('content')
-<h1 class="text-2xl font-bold mb-4">Afegir nou equip</h1>
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Crear Nou Equip</h2>
 
-@if ($errors->any())
-  <div class="bg-red-100 text-red-700 p-2 mb-4">
-    <ul>
-      @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
-    </ul>
-  </div>
-@endif
+    <form action="{{ route('equips.store') }}" method="POST">
+        @csrf
 
-<form action="{{ route('equips.store') }}" method="POST" class="space-y-4">
-  @csrf
-  <div>
-    <label for="nom" class="block font-bold">Nom:</label>
-    <input type="text" name="nom" id="nom" value="{{ old('nom') }}" class="border p-2 w-full">
-  </div>
-  <div>
-    <label for="estadi" class="block font-bold">Estadi:</label>
-    <input type="text" name="estadi" id="estadi" value="{{ old('estadi') }}" class="border p-2 w-full">
-  </div>
-  <div>
-    <label for="titols" class="block font-bold">Títols:</label>
-    <input type="number" name="titols" id="titols" value="{{ old('titols') }}" class="border p-2 w-full">
-  </div>
-  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Afegir</button>
-</form>
+        {{-- Camp Nom --}}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Nom de l'Equip</label>
+            <input type="text" name="nom" value="{{ old('nom') }}" class="w-full border p-2 rounded">
+            @error('nom') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- NUEVO: Camp Ciutat --}}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Ciutat</label>
+            <input type="text" name="ciutat" value="{{ old('ciutat') }}" class="w-full border p-2 rounded">
+            @error('ciutat') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- NUEVO: Camp Pressupost --}}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Pressupost (€)</label>
+            <input type="number" name="pressupost" value="{{ old('pressupost') }}" class="w-full border p-2 rounded">
+            @error('pressupost') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- Camp Títols --}}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Títols</label>
+            <input type="number" name="titols" value="{{ old('titols', 0) }}" class="w-full border p-2 rounded">
+            @error('titols') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- Select Estadi (Si ya tienes el componente hecho) --}}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">Estadi</label>
+            <select name="estadi_id" class="w-full border p-2 rounded">
+                @foreach($estadis as $estadi)
+                    <option value="{{ $estadi->id }}">{{ $estadi->nom }}</option>
+                @endforeach
+            </select>
+             @error('estadi_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+        </div>
+
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Crear Equip</button>
+    </form>
+</div>
 @endsection
