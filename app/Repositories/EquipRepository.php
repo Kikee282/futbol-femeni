@@ -26,4 +26,8 @@ class EquipRepository implements BaseRepository {
     public function delete($id) {
         return Equip::destroy($id);
     }
+    public function all()
+    {
+        return Equip::all();
+    }
 }

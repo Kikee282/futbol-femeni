@@ -2,97 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Equip; // Necessari per al formulari
 use App\Models\Jugadora;
-use App\Repositories\JugadoraRepository;
-use App\Services\JugadoraService;
+use App\Models\Equip;
+use App\Http\Requests\JugadoraRequest;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class JugadoraController extends Controller
 {
-    protected $jugadoraService;
-    protected $jugadoraRepository;
+    // Definimos las posiciones posibles como una constante o propiedad privada
+    private $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
 
-    // Definim les posicions per al formulari <select>
-    protected $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
-
-    public function __construct(JugadoraService $jugadoraService, JugadoraRepository $jugadoraRepository)
-    {
-        $this->jugadoraService = $jugadoraService;
-        $this->jugadoraRepository = $jugadoraRepository;
-    }
-
-    /**
-     * Mostra la llista de jugadores (ja implementat).
-     */
     public function index()
     {
-        $jugadores = $this->jugadoraRepository->getAll();
+        $jugadores = Jugadora::all();
         return view('jugadores.index', compact('jugadores'));
     }
 
-    /**
-     * Mostra el formulari de creació.
-     */
     public function create()
     {
-        $equips = Equip::all(); // Obtenim equips per al <select>
-        return view('jugadores.create', [
-            'posicions' => $this->posicions,
-            'equips' => $equips
-        ]);
+        $equips = Equip::all();
+        // Pasamos la lista de posiciones a la vista
+        $posicions = $this->posicions;
+        
+        return view('jugadores.create', compact('equips', 'posicions'));
     }
 
-    /**
-     * Guarda la nova jugadora.
-     */
-    public function store(Request $request)
+    public function store(JugadoraRequest $request)
     {
-        try {
-            $this->jugadoraService->createJugadora($request->all());
-            return redirect()->route('jugadores.index')->with('success', 'Jugadora creada correctament.');
-        } catch (ValidationException $e) {
-            return redirect()->route('jugadores.create')
-                ->withErrors($e->validator)
-                ->withInput();
+        $datos = $request->validated();
+
+        if ($request->hasFile('foto')) {
+            $datos['foto'] = $request->file('foto')->store('jugadores', 'public');
         }
+
+        Jugadora::create($datos);
+
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora creada!');
     }
 
-    /**
-     * Mostra el formulari per editar.
-     */
-    public function edit(Jugadora $jugadora) // Route Model Binding
+    public function edit(Jugadora $jugadora)
     {
         $equips = Equip::all();
-        return view('jugadores.edit', [
-            'jugadora' => $jugadora,
-            'posicions' => $this->posicions,
-            'equips' => $equips
-        ]);
+        // También necesitamos las posiciones al editar
+        $posicions = $this->posicions; 
+
+        return view('jugadores.edit', compact('jugadora', 'equips', 'posicions'));
     }
 
-    /**
-     * Actualitza una jugadora existent.
-     */
-    public function update(Request $request, Jugadora $jugadora)
+    public function update(JugadoraRequest $request, Jugadora $jugadora)
     {
-        try {
-            $this->jugadoraService->updateJugadora($jugadora->id, $request->all());
-            return redirect()->route('jugadores.index')->with('success', 'Jugadora actualitzada correctament.');
-        } catch (ValidationException $e) {
-            return redirect()->route('jugadores.edit', $jugadora->id)
-                ->withErrors($e->validator)
-                ->withInput();
+        $datos = $request->validated();
+
+        if ($request->hasFile('foto')) {
+            if ($jugadora->foto) {
+                Storage::disk('public')->delete($jugadora->foto);
+            }
+            $datos['foto'] = $request->file('foto')->store('jugadores', 'public');
         }
+
+        $jugadora->update($datos);
+
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora actualitzada!');
     }
 
-    /**
-     * Esborra una jugadora.
-     */
     public function destroy(Jugadora $jugadora)
     {
-        $this->jugadoraRepository->delete($jugadora->id);
-        return redirect()->route('jugadores.index')->with('success', 'Jugadora esborrada correctament.');
+        if ($jugadora->foto) {
+            Storage::disk('public')->delete($jugadora->foto);
+        }
+        $jugadora->delete();
+        return redirect()->route('jugadores.index')->with('success', 'Jugadora eliminada!');
     }
 }

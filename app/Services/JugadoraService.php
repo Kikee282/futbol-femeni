@@ -3,16 +3,13 @@
 namespace App\Services;
 
 use App\Repositories\JugadoraRepository;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use App\Models\Jugadora;
+use Illuminate\Http\UploadedFile; // Importante para manejar archivos
+use Illuminate\Support\Facades\Storage;
 
 class JugadoraService
 {
     protected $repository;
-
-    // Definim les posicions per validar
-    protected $posicions = ['Portera', 'Defensa', 'Migcampista', 'Davantera'];
 
     public function __construct(JugadoraRepository $repository)
     {
@@ -20,44 +17,31 @@ class JugadoraService
     }
 
     /**
-     * Valida i crea una nova jugadora.
+     * Crea una nova jugadora i gestiona la foto si n'hi ha.
      */
-    public function createJugadora(array $data)
+    public function createJugadora(array $data, ?UploadedFile $foto = null): Jugadora
     {
-        $validator = Validator::make($data, [
-            'nom' => 'required|string|min:3|max:150',
-            'posicio' => ['required', Rule::in($this->posicions)],
-            'data_naixement' => 'nullable|date_format:Y-m-d',
-            'dorsal' => 'nullable|integer|min:1',
-            'equip_id' => 'required|exists:equips,id', // Valida que l'equip existeixi
-            'foto' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
+        // 1. Si ens passen una foto, la guardem al disc i actualitzem la ruta a l'array
+        if ($foto) {
+            $data['foto'] = $foto->store('jugadores', 'public');
         }
 
-        return $this->repository->create($validator->validated());
+        // 2. Cridem al repositori per guardar a la BD (les dades ja venen validades del Request)
+        return $this->repository->create($data);
     }
 
     /**
-     * Valida i actualitza una jugadora existent.
+     * Actualitza una jugadora i gestiona el canvi de foto.
      */
-    public function updateJugadora(int $id, array $data)
+    public function update($id, array $data): Jugadora
     {
-        $validator = Validator::make($data, [
-            'nom' => 'required|string|min:3|max:150',
-            'posicio' => ['required', Rule::in($this->posicions)],
-            'data_naixement' => 'nullable|date_format:Y-m-d',
-            'dorsal' => 'nullable|integer|min:1',
-            'equip_id' => 'required|exists:equips,id',
-            'foto' => 'nullable|string|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        return $this->repository->update($id, $validator->validated());
+        // 1. Buscamos la jugadora
+        $jugadora = Jugadora::findOrFail($id);
+        
+        // 2. Actualizamos los datos (esto devuelve bool)
+        $jugadora->update($data);
+        
+        // 3. IMPORTANTE: Devolvemos el objeto jugadora, no el booleano
+        return $jugadora;
     }
 }

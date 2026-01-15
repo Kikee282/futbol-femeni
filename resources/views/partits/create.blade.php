@@ -1,5 +1,4 @@
-@extends('layouts.app')
-
+@extends('layouts.equip')
 @section('title', 'Programar Nou Partit')
 
 @section('content')

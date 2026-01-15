@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.equip')
 
 @section('title', 'Crear Equip')
 
@@ -6,7 +6,7 @@
 <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
     <h2 class="text-xl font-bold mb-4">Crear Nou Equip</h2>
 
-    <form action="{{ route('equips.store') }}" method="POST">
+    <form action="{{ route('equips.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- Camp Nom --}}
@@ -47,6 +47,12 @@
             </select>
              @error('estadi_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
         </div>
+
+<div class="mb-4">
+    <label for="escut" class="block text-sm font-medium text-gray-700 mb-1">Escut:</label>
+    <input type="file" name="escut" id="escut"
+        class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+</div>
 
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Crear Equip</button>
     </form>

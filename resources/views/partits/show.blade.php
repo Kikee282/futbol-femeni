@@ -1,5 +1,4 @@
-@extends('layouts.app')
-
+@extends('layouts.equip')
 @section('title', $partit->local->nom . ' vs ' . $partit->visitant->nom)
 
 @section('content')

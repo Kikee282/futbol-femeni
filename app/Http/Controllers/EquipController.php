@@ -2,60 +2,84 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreEquipRequest;
-use App\Http\Requests\UpdateEquipRequest;
 use App\Models\Equip;
 use App\Models\Estadi;
-use App\Services\EquipService;
+use App\Http\Requests\StoreEquipRequest;  // <--- Importamos tus Requests existentes
+use App\Http\Requests\UpdateEquipRequest; // <--- Importamos tus Requests existentes
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-class EquipController extends Controller {
-    public function __construct(private EquipService $servei) {}
+use Illuminate\Support\Facades\Storage;
 
-    // GET /equips
-    public function index() {
-        return view('equips.index', ['equips' => $this->servei->llistar()]);
+class EquipController extends Controller
+{
+    public function index()
+    {
+        $equips = Equip::with('estadi')->paginate(10);
+
+        return view('equips.index', compact('equips'));
     }
 
-    // GET /equips/create
     public function create()
-{
-    $estadis = Estadi::all(); // Obtener estadios para el select
-    return view('equips.create', compact('estadis'));
-}
-    // POST /equips
-    public function store(StoreEquipRequest $request) {
-        $this->servei->guardar($request->validated());
-        return redirect()->route('equips.index');
+    {
+        $estadis = Estadi::all();
+        return view('equips.create', compact('estadis'));
     }
 
-    // GET /equips/{id}
+    // Usamos StoreEquipRequest en lugar de Request
+    public function store(StoreEquipRequest $request)
+    {
+        // 1. La validación ya se ha hecho automáticamente. Obtenemos los datos validados.
+        $datos = $request->validated();
+
+        // 2. Gestión de la imagen (Escut)
+        if ($request->hasFile('escut')) {
+            $ruta = $request->file('escut')->store('escuts', 'public');
+            $datos['escut'] = $ruta;
+        }
+
+        // 3. Crear
+        Equip::create($datos);
+
+        return redirect()->route('equips.index')->with('success', 'Equip creat correctament!');
+    }
+
     public function show(Equip $equip)
-{
-    // Carga las relaciones para usarlas en la vista
-    $equip->load('jugadores', 'estadi');
-    
-    // IMPORTANTE: Debe retornar 'view', NO '$equip'
-    return view('equips.show', compact('equip'));
-}
-
-    // GET /equips/{id}/edit
-    public function edit(Equip $equip) {
-        return view('equips.edit', compact('equip'));
+    {
+        return view('equips.show', compact('equip'));
     }
 
-    // PUT /equips/{id}/edit
-    public function update(Request $request, Equip $equip) {
-        $this->servei->actualitzar($equip, $request->validated());
-        return redirect()->route('equips.index')->with('ok', 'Equip actualitzat');
+    public function edit(Equip $equip)
+    {
+        $estadis = Estadi::all();
+        return view('equips.edit', compact('equip', 'estadis'));
     }
 
+    // Usamos UpdateEquipRequest en lugar de Request
+    public function update(UpdateEquipRequest $request, Equip $equip)
+    {
+        // 1. Obtener datos validados
+        $datos = $request->validated();
 
+        // 2. Gestión de la imagen si se sube una nueva
+        if ($request->hasFile('escut')) {
+            // Borrar la vieja si existe
+            if ($equip->escut) {
+                Storage::disk('public')->delete($equip->escut);
+            }
+            $datos['escut'] = $request->file('escut')->store('escuts', 'public');
+        }
 
+        // 3. Actualizar
+        $equip->update($datos);
 
-    // DELETE /equips/{id}
-    public function destroy($id) {
-        $this->servei->eliminar($id);
-        return redirect()->route('equips.index');
+        return redirect()->route('equips.index')->with('success', 'Equip actualitzat!');
+    }
+
+    public function destroy(Equip $equip)
+    {
+        if ($equip->escut) {
+            Storage::disk('public')->delete($equip->escut);
+        }
+        $equip->delete();
+        return redirect()->route('equips.index')->with('success', 'Equip eliminat!');
     }
 }
