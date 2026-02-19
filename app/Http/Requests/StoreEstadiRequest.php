@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreEquipRequest extends FormRequest
+class StoreEstadiRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,8 +15,7 @@ class StoreEquipRequest extends FormRequest
     {
         return [
             'nom' => 'required|string|max:255',
-            'estadi_id' => 'required|exists:estadis,id',
-            'titols' => 'nullable|integer|min:0',
+            'capacitat' => 'required|integer|min:100',
         ];
     }
 }
